@@ -1,1 +1,5 @@
+include ':exo-player'
+include ':ijk-player'
+include ':king-player'
+include ':vlc-player'
 include ':app'
