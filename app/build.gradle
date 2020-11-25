@@ -14,6 +14,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
+        ndk {
+            //设置支持的SO库架构（开发者可以根据需要，选择一个或多个平台的so）
+            abiFilters /*'armeabi', */ 'armeabi-v7a' //, 'x86'
+        }
     }
 
     buildTypes {
@@ -46,6 +50,10 @@ dependencies {
     implementation project(path: ':ijk-player')
     implementation project(path: ':exo-player')
     implementation project(path: ':vlc-player')
+
+    implementation project(path: ':vlc-player')
+
+    implementation "tv.danmaku.ijk.media:ijkplayer-armv7a:$versions.ijkplayer"
 
     //leakCanary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$versions.leakcanary"

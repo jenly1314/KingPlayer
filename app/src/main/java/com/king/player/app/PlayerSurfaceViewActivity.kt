@@ -3,8 +3,8 @@ package com.king.player.app
 import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
-import com.king.player.kingplayer.DataSource
-import com.king.player.kingplayer.media.SysPlayer
+import com.king.player.exoplayer.ExoPlayer
+import com.king.player.kingplayer.source.DataSource
 import kotlinx.android.synthetic.main.player_surface_view_activity.*
 
 /**
@@ -12,8 +12,10 @@ import kotlinx.android.synthetic.main.player_surface_view_activity.*
  */
 class PlayerSurfaceViewActivity: AppCompatActivity() {
 
+//    val player by lazy { IjkPlayer(this) }
+    val player by lazy { ExoPlayer(this) }
 //    val player by lazy { VlcPlayer(this) }
-    val player by lazy { SysPlayer(this) }
+//    val player by lazy { SysPlayer(this) }
 
     var isCreate = false
 
@@ -71,7 +73,8 @@ class PlayerSurfaceViewActivity: AppCompatActivity() {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 player.setSurface(holder)
                 player.updateSurface(surfaceView.width,surfaceView.height)
-                val dataSource = DataSource(url)
+                val dataSource =
+                    DataSource(url)
                 player.setDataSource(dataSource)
 
                 player.start()
@@ -162,7 +165,7 @@ class PlayerSurfaceViewActivity: AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        player.stop()
+//        player.stop()
     }
 
 

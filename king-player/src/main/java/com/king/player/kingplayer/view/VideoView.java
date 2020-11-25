@@ -19,7 +19,7 @@ import androidx.annotation.Nullable;
 import com.king.player.core.R;
 import com.king.player.kingplayer.AspectRatio;
 import com.king.player.kingplayer.KingPlayer;
-import com.king.player.kingplayer.DataSource;
+import com.king.player.kingplayer.source.DataSource;
 import com.king.player.kingplayer.IMeasureSurface;
 import com.king.player.kingplayer.IPlayer;
 

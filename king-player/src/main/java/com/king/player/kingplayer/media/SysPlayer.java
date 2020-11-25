@@ -14,7 +14,7 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 
 import com.king.player.kingplayer.KingPlayer;
-import com.king.player.kingplayer.DataSource;
+import com.king.player.kingplayer.source.DataSource;
 import com.king.player.kingplayer.util.LogUtils;
 
 
@@ -34,21 +34,23 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
 
 
     public SysPlayer(@NonNull Context context){
-        this.mContext = context;
-        mMediaPlayer = new MediaPlayer();
+        this(context,new MediaPlayer());
+    }
+
+    public SysPlayer(@NonNull Context context,MediaPlayer mediaPlayer){
+        this.mContext = context.getApplicationContext();
+        this.mMediaPlayer = mediaPlayer;
     }
 
     @Override
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.setDisplay(surfaceHolder);
         mMediaPlayer.setScreenOnWhilePlaying(true);
-        LogUtils.d("surfaceHolder:" + surfaceHolder.getSurfaceFrame().width() + "," + surfaceHolder.getSurfaceFrame().height());
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.setSurface(surface);
-
     }
 
     @Override
@@ -170,7 +172,7 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                         break;
                     case MediaPlayer.MEDIA_INFO_UNKNOWN:
                         LogUtils.d("MEDIA_INFO_UNKNOWN");
-                        sendPlayerEvent(Event.EVENT_ON_BUFFERING_END);
+                        sendPlayerEvent(Event.EVENT_ON_UNKNOWN);
                         break;
                     case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
                         LogUtils.d("MEDIA_INFO_UNSUPPORTED_SUBTITLE");
@@ -243,16 +245,17 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                mMediaPlayer.setDataSource(mDataSource.getPath());
             }else if(mDataSource.getUri() != null){
                 mMediaPlayer.setDataSource(mContext,mDataSource.getUri(),mDataSource.getHeaders());
-            }else if(mDataSource.getAssetFileDescriptor() != null){
+            }else if(mDataSource.getAssetFileDescriptor(mContext) != null){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    mMediaPlayer.setDataSource(mDataSource.getAssetFileDescriptor());
+                    mMediaPlayer.setDataSource(mDataSource.getAssetFileDescriptor(mContext));
                 }else{
-                    AssetFileDescriptor assetFileDescriptor = mDataSource.getAssetFileDescriptor();
+                    AssetFileDescriptor assetFileDescriptor = mDataSource.getAssetFileDescriptor(mContext);
                     if(assetFileDescriptor.getDeclaredLength() < 0){
                         mMediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor());
                     }else{
                         mMediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),assetFileDescriptor.getStartOffset(),assetFileDescriptor.getDeclaredLength());
                     }
+
                 }
             }else{
                 LogUtils.d(mDataSource.toString());
@@ -262,9 +265,11 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
             mMediaPlayer.prepareAsync();
             mCurrentState = STATE_PREPARING;
             mTargetState = STATE_PREPARING;
+            sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
         } catch (Exception e) {
             e.printStackTrace();
             mCurrentState = STATE_ERROR;
+            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
     }
 
@@ -302,6 +307,7 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                     || mCurrentState == STATE_PLAYBACK_COMPLETED)){
                 mMediaPlayer.pause();
                 mCurrentState = STATE_PAUSED;
+                sendPlayerEvent(Event.EVENT_ON_PAUSE);
                 LogUtils.d("pause");
             }
         }catch (Exception e){
@@ -319,6 +325,7 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                     || mCurrentState == STATE_PLAYBACK_COMPLETED)){
                 mMediaPlayer.stop();
                 mCurrentState = STATE_STOPPED;
+                sendPlayerEvent(Event.EVENT_ON_STOP);
                 LogUtils.d("stop");
             }
         }catch (Exception e){
@@ -332,6 +339,7 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
         if(available()){
             mMediaPlayer.release();
             mCurrentState = STATE_IDLE;
+            sendPlayerEvent(Event.EVENT_ON_RELEASE);
             LogUtils.d("release");
         }
         resetListener();
@@ -343,6 +351,7 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
         if(available()){
             mMediaPlayer.reset();
             mCurrentState = STATE_IDLE;
+            sendPlayerEvent(Event.EVENT_ON_RESET);
             LogUtils.d("reset");
         }
         mTargetState = STATE_IDLE;
@@ -364,9 +373,9 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
     @Override
     public void setVolume(float volume) {
         if(available()){
+            mVolume = volume;
             mMediaPlayer.setVolume(volume,volume);
         }
-        mVolume = volume;
     }
 
     @Override

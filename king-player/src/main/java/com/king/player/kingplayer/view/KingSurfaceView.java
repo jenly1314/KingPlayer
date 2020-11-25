@@ -1,6 +1,7 @@
 package com.king.player.kingplayer.view;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.util.AttributeSet;
 import android.view.SurfaceView;
 
@@ -30,6 +31,12 @@ public class KingSurfaceView extends SurfaceView implements IMeasureSurface {
     public KingSurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mMeasureHelper = new MeasureHelper(this);
+        init();
+    }
+
+    public void init(){
+        setZOrderOnTop(true);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
     }
 
     @Override

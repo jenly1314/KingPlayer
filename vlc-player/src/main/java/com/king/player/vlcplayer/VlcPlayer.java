@@ -15,8 +15,9 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 
 import com.king.player.kingplayer.KingPlayer;
-import com.king.player.kingplayer.DataSource;
+import com.king.player.kingplayer.source.DataSource;
 import com.king.player.kingplayer.util.LogUtils;
+import com.king.player.vlcplayer.source.VlcDataSource;
 
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
@@ -26,6 +27,7 @@ import org.videolan.libvlc.interfaces.IMedia;
 import org.videolan.libvlc.interfaces.IVLCVout;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
@@ -35,6 +37,8 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private ILibVLC mLibVLC;
 
     private MediaPlayer mMediaPlayer;
+
+    private Context mContext;
 
     private DataSource mDataSource;
 
@@ -51,7 +55,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private Bundle mBundle = obtainBundle();
 
     public VlcPlayer(@NonNull Context context){
-
+        mContext = context.getApplicationContext();
         final ArrayList<String> args = new ArrayList<>();
         args.add("-vvv");
         mLibVLC = new LibVLC(context,args);
@@ -59,7 +63,8 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
         initHandlerThread();
     }
 
-    public VlcPlayer(@NonNull MediaPlayer mediaPlayer){
+    public VlcPlayer(@NonNull Context context,@NonNull MediaPlayer mediaPlayer){
+        mContext = context.getApplicationContext();
         mMediaPlayer = mediaPlayer;
         initHandlerThread();
     }
@@ -170,16 +175,14 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                 }
             }else if(mDataSource.getUri() != null){
                 media = new Media(mMediaPlayer.getLibVLC(),mDataSource.getUri());
-            }else if(mDataSource.getAssetFileDescriptor() != null){
-                media = new Media(mMediaPlayer.getLibVLC(),mDataSource.getAssetFileDescriptor());
+            }else if(mDataSource.getAssetFileDescriptor(mContext) != null){
+                media = new Media(mMediaPlayer.getLibVLC(),mDataSource.getAssetFileDescriptor(mContext));
             }else{
                 LogUtils.d(mDataSource.toString());
             }
             if(media != null){
-                if(mDataSource.getOptions() != null){
-                    for(String option: mDataSource.getOptions()){
-                        media.addOption(option);
-                    }
+                if(mDataSource instanceof VlcDataSource){
+                    initOptions(media,((VlcDataSource) mDataSource).getOptions());
                 }
                 media.setEventListener(new IMedia.EventListener() {
                     @Override
@@ -216,12 +219,22 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
 
                 mCurrentState = STATE_PREPARED;
                 mTargetState = STATE_PREPARING;
+                sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
             }
         } catch (Exception e) {
             e.printStackTrace();
             mCurrentState = STATE_ERROR;
+            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
 
+    }
+
+    public void initOptions(IMedia media, Collection<String> options){
+        if(options != null){
+            for(String option: options){
+                media.addOption(option);
+            }
+        }
     }
 
     @Override
@@ -241,10 +254,12 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                     case MediaPlayer.Event.Buffering:
                         LogUtils.d(String.format("Event.Buffering: 0x%s",Integer.toHexString(event.type)));
                         int buffering = (int)event.getBuffering();
-                        sendBufferingUpdateEvent(buffering);
                         if(buffering == 0){
                             sendPlayerEvent(Event.EVENT_ON_BUFFERING_START);
-                        }else if(buffering == 100){
+                        }
+                        sendBufferingUpdateEvent(buffering);
+
+                        if(buffering == 100){
                             sendPlayerEvent(Event.EVENT_ON_BUFFERING_END);
                         }
                         break;
@@ -375,6 +390,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private void onStart(){
         mMediaPlayer.play();
         mCurrentState = STATE_PLAYING;
+        sendPlayerEvent(Event.EVENT_ON_START);
         LogUtils.d("start");
     }
 
@@ -395,6 +411,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private void onPause(){
         mMediaPlayer.pause();
         mCurrentState = STATE_PAUSED;
+        sendPlayerEvent(Event.EVENT_ON_PAUSE);
         LogUtils.d("pause");
     }
 
@@ -418,6 +435,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
             }
         }
         mCurrentState = STATE_STOPPED;
+        sendPlayerEvent(Event.EVENT_ON_STOP);
     }
 
     @Override
@@ -438,6 +456,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
         }
         resetListener();
         mCurrentState = STATE_IDLE;
+        sendPlayerEvent(Event.EVENT_ON_RELEASE);
         if(mHandlerThread != null){
             mHandlerThread.quitSafely();
         }
@@ -454,6 +473,7 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private void onReset(){
         mMediaPlayer.setMedia(null);
         mCurrentState = STATE_IDLE;
+        sendPlayerEvent(Event.EVENT_ON_RESET);
     }
 
     @Override
@@ -468,19 +488,17 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
 
     @Override
     public void setVolume(float volume) {
-        if(isReleased()){
-           return;
+        if(available()){
+            mMediaPlayer.setVolume((int)volume);
         }
-        mMediaPlayer.setVolume((int)volume);
-
     }
 
     @Override
     public float getVolume() {
-        if(isReleased()){
-            return -1;
+        if(available()){
+            return mMediaPlayer.getVolume();
         }
-        return mMediaPlayer.getVolume();
+        return -1;
     }
 
     @Override

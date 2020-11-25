@@ -1,13 +1,11 @@
 package com.king.player.app
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
-import com.king.player.kingplayer.DataSource
+import com.king.player.kingplayer.source.DataSource
 import com.king.player.kingplayer.media.SysPlayer
 import com.king.player.kingplayer.view.VideoView
-import com.king.player.vlcplayer.VlcPlayer
 import kotlinx.android.synthetic.main.video_view_activity.*
 
 /**

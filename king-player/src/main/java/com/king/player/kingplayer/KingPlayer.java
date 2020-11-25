@@ -189,6 +189,7 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
         int ERROR_EVENT_TIMED_OUT = 0x9018;
     }
 
+
     @Retention(RetentionPolicy.SOURCE)
     public @interface Event {
 
@@ -350,6 +351,7 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
         int EVENT_ON_STATUS_CHANGE = 0x1031;
 
 
+
         /**
          * if you set data provider for player, call back this method when provider start load data.
          */
@@ -364,6 +366,12 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
          * call back this method when provider load data error.
          */
         int EVENT_ON_PROVIDER_DATA_ERROR = 0x1052;
+
+        int EVENT_ON_UNKNOWN = 0x1053;
+
+        int EVENT_ON_VIDEO_DECODED_START = 0x1054;
+
+        int EVENT_ON_COMPONENT_OPEN = 0x1055;
 
     }
 

@@ -1,23 +1,23 @@
 package com.king.player.app
 
 import android.graphics.SurfaceTexture
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.TextureView
 import androidx.appcompat.app.AppCompatActivity
-import com.king.player.kingplayer.DataSource
-import com.king.player.kingplayer.media.SysPlayer
+import com.king.player.exoplayer.ExoPlayer
+import com.king.player.ijkplayer.IjkPlayer
+import com.king.player.kingplayer.source.DataSource
 import com.king.player.kingplayer.util.LogUtils
-import com.king.player.vlcplayer.VlcPlayer
 import kotlinx.android.synthetic.main.player_texture_view_activity.*
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
 class PlayerTextureViewActivity: AppCompatActivity() {
-
-    val player by lazy { VlcPlayer(this) }
+//    val player by lazy { IjkPlayer(this) }
+    val player by lazy { ExoPlayer(this) }
+//    val player by lazy { VlcPlayer(this) }
 //    val player by lazy { SysPlayer(this) }
 
     var isCreate = false
@@ -89,7 +89,8 @@ class PlayerTextureViewActivity: AppCompatActivity() {
             ) {
                 player.setSurface(surface)
                 player.updateSurface(width,height)
-                val dataSource = DataSource(url)
+                val dataSource =
+                    DataSource(url)
                 player.setDataSource(dataSource)
                 player.start()
             }
@@ -156,7 +157,7 @@ class PlayerTextureViewActivity: AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        player.stop()
+//        player.stop()
     }
 
     override fun onDestroy() {
