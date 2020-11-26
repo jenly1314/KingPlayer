@@ -90,9 +90,13 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 
 
 ## 感谢
+
 [Ijkplayer](https://github.com/bilibili/ijkplayer)
+
 [Exoplayer](https://github.com/google/ExoPlayer)
+
 [vlc-android](https://code.videolan.org/videolan/vlc-android)
+
 [MediaPlayer](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/media/java/android/media/MediaPlayer.java)
 
 ## 赞赏
