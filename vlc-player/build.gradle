@@ -37,8 +37,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$versions.androidExtJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
 
-    api "org.videolan.android:libvlc-all:3.3.1"
-//    api "org.videolan.android:libvlc-all:3.1.12"
+    api "org.videolan.android:libvlc-all:$versions.vlcplayer"
 
     compileOnly  project(path: ':king-player')
 

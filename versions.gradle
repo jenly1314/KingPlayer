@@ -32,6 +32,7 @@ versions.rxpermissions = "0.10.2"
 
 versions.ijkplayer = "0.8.8"
 versions.exoplayer = "2.12.1"
+versions.vlcplayer = "3.3.1"
 
 
 ext.versions = versions
