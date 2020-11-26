@@ -480,7 +480,7 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 mMediaPlayer.setSpeed(speed);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            handleException(e,false);
         }
     }
 
@@ -491,7 +491,7 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 return mMediaPlayer.getSpeed(1.0f);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            handleException(e,false);
         }
         return 1.0f;
     }

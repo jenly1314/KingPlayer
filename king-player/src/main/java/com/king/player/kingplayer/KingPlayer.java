@@ -66,7 +66,8 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
     }
 
     protected void handleException(Exception e, boolean isReset){
-        if(e != null){
+        if(e != null && LogUtils.isShowLog()){
+            e.printStackTrace();
             LogUtils.e(e);
         }
         sendErrorEvent(ErrorEvent.ERROR_EVENT_EXCEPTION);

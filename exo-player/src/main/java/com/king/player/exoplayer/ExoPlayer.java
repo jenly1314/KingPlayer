@@ -23,8 +23,6 @@ import com.google.android.exoplayer2.Player.EventListener;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -484,7 +482,7 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
 
             }
         }catch (Exception e){
-            e.printStackTrace();
+            handleException(e,false);
         }
     }
 
@@ -495,7 +493,7 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
                 return mMediaPlayer.getPlaybackParameters().speed;
             }
         }catch (Exception e){
-            e.printStackTrace();
+            handleException(e,false);
         }
         return 1.0f;
     }
