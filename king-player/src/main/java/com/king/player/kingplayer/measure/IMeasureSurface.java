@@ -1,4 +1,6 @@
-package com.king.player.kingplayer;
+package com.king.player.kingplayer.measure;
+
+import com.king.player.kingplayer.AspectRatio;
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>

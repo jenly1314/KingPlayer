@@ -69,12 +69,6 @@ public interface IPlayer<Player> {
     void setVolume(float volume);
 
     /**
-     * 获取音量
-     * @return
-     */
-    float getVolume();
-
-    /**
      * 播放指定位置
      * @param msec
      */

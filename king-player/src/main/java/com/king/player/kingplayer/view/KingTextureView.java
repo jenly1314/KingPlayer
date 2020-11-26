@@ -5,8 +5,8 @@ import android.util.AttributeSet;
 import android.view.TextureView;
 
 import com.king.player.kingplayer.AspectRatio;
-import com.king.player.kingplayer.IMeasureSurface;
-import com.king.player.kingplayer.MeasureHelper;
+import com.king.player.kingplayer.measure.IMeasureSurface;
+import com.king.player.kingplayer.measure.MeasureHelper;
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>

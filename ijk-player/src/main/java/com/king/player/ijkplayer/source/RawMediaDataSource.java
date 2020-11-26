@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,12 +16,12 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
-public class RawDataSourceProvider implements IMediaDataSource {
+public class RawMediaDataSource implements IMediaDataSource {
     private AssetFileDescriptor mDescriptor;
 
     private byte[]  mMediaBytes;
 
-    public RawDataSourceProvider(AssetFileDescriptor descriptor) {
+    public RawMediaDataSource(@NonNull AssetFileDescriptor descriptor) {
         this.mDescriptor = descriptor;
     }
 
@@ -79,10 +81,10 @@ public class RawDataSourceProvider implements IMediaDataSource {
         return byteBuffer.toByteArray();
     }
 
-    public static RawDataSourceProvider create(Context context, Uri uri){
+    public static RawMediaDataSource create(@NonNull Context context, @NonNull Uri uri){
         try {
             AssetFileDescriptor fileDescriptor = context.getApplicationContext().getContentResolver().openAssetFileDescriptor(uri, "r");
-            return new RawDataSourceProvider(fileDescriptor);
+            return new RawMediaDataSource(fileDescriptor);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

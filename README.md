@@ -1,5 +1,91 @@
 # KingPlayer
-KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、MediaPlayer）的基础库
+KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、MediaPlayer）的基础库，无缝切换内核。
+
+
+## 进度说明
+- [x] 主要播放相关核心功能
+- [x] 播放器无缝切换
+  - [x] MediaPlayer封装实现
+  - [x] IjkPlayer封装实现
+  - [x] ExoPlayer封装实现
+  - [x] VlcPlayer封装实现
+- [ ] 控制图层相关
+  - [ ] 待补充...
+
+## 示例
+
+布局示例
+```xml
+    <com.king.player.kingplayer.view.VideoView
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+```
+
+代码示例
+```kotlin
+        //初始化一个视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、SysPlayer）
+        videoView.player = IjkPlayer(context)
+        videoView.setOnSurfaceListener(object : VideoView.OnSurfaceListener {
+            override fun onSurfaceCreated(surface: Surface, width: Int, height: Int) {
+                LogUtils.d("onSurfaceCreated: $width * $height")
+                val dataSource = DataSource(url)
+                videoView.setDataSource(dataSource)
+                videoView.start()
+            }
+
+            override fun onSurfaceSizeChanged(surface: Surface, width: Int, height: Int) {
+                LogUtils.d("onSurfaceSizeChanged: $width * $height")
+            }
+
+            override fun onSurfaceDestroyed(surface: Surface) {
+                LogUtils.d("onSurfaceDestroyed")
+            }
+
+        })
+
+        //缓冲更新监听
+        videoView.setOnBufferingUpdateListener {
+            LogUtils.d("buffering: $it")
+        }
+        //播放事件监听
+        videoView.setOnPlayerEventListener { event, bundle ->
+
+        }
+        //错误事件监听
+        videoView.setOnErrorListener { event, bundle ->
+
+        }
+        
+
+
+```
+```kotlin
+        
+        //------------ 控制相关
+        //开始
+        videoView.start()
+        //暂停
+        videoView.pause()
+        //进度调整到指定位置
+        videoView.seekTo(pos)
+        //停止
+        videoView.stop()
+        //释放
+        videoView.release()
+        //重置
+        videoView.reset()
+```
+
+
+更多使用详情，请查看[app](app)中的源码使用示例
+
+
+## 感谢
+[Ijkplayer](https://github.com/bilibili/ijkplayer)
+[Exoplayer](https://github.com/google/ExoPlayer)
+[vlc-android](https://code.videolan.org/videolan/vlc-android)
+[MediaPlayer](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/media/java/android/media/MediaPlayer.java)
 
 ## 赞赏
 如果您喜欢KingPlayer，或感觉KingPlayer帮助到了您，可以点右上角“Star”支持一下，您的支持就是我的动力，谢谢 :smiley:<p>

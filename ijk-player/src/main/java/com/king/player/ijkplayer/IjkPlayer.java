@@ -11,9 +11,10 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.king.player.ijkplayer.source.IjkDataSource;
-import com.king.player.ijkplayer.source.RawDataSourceProvider;
+import com.king.player.ijkplayer.source.RawMediaDataSource;
 import com.king.player.kingplayer.source.DataSource;
 import com.king.player.kingplayer.KingPlayer;
 import com.king.player.kingplayer.util.LogUtils;
@@ -34,22 +35,17 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
 
     private Context mContext;
 
-    private float mVolume;
-
     private DataSource mDataSource;
 
-    static {
-        IjkMediaPlayer.loadLibrariesOnce(null);
-        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
+    private Bundle mBundle = obtainBundle();
+
+    public IjkPlayer(@NonNull Context context){
+        this(context,null);
     }
 
-    public IjkPlayer(Context context){
-        this(context,new IjkMediaPlayer());
-    }
-
-    public IjkPlayer(Context context,IjkMediaPlayer mediaPlayer){
+    public IjkPlayer(@NonNull Context context,@Nullable IjkMediaPlayer mediaPlayer){
         this.mContext = context.getApplicationContext();
-        mMediaPlayer = mediaPlayer;
+        mMediaPlayer = mediaPlayer != null ? mediaPlayer : new IjkMediaPlayer();
     }
 
     @Override
@@ -77,7 +73,7 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 if(fileDescriptor != null){
                     mMediaPlayer.setDataSource(fileDescriptor);
                 }else{
-                    mMediaPlayer.setDataSource(new RawDataSourceProvider(mDataSource.getAssetFileDescriptor(mContext)));
+                    mMediaPlayer.setDataSource(new RawMediaDataSource(mDataSource.getAssetFileDescriptor(mContext)));
                 }
             }else{
                 LogUtils.d(mDataSource.toString());
@@ -89,13 +85,12 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
             mTargetState = STATE_PREPARING;
             sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleException(e,false);
             mCurrentState = STATE_ERROR;
-            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
     }
 
-    public void initOptions(IjkMediaPlayer mediaPlayer, Collection<IjkDataSource.OptionModel> options){
+    public void initOptions(@NonNull IjkMediaPlayer mediaPlayer, @Nullable Collection<IjkDataSource.OptionModel> options){
 
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
 
@@ -170,35 +165,35 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
         mMediaPlayer.setOnErrorListener(new IMediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(IMediaPlayer iMediaPlayer, int what, int extra) {
-                mCurrentState = STATE_ERROR;
-                mTargetState = STATE_ERROR;
                 LogUtils.w("onError: " + what + ", extra:" + extra);
-                int eventCode = ErrorEvent.ERROR_EVENT_COMMON;
+                int event = ErrorEvent.ERROR_EVENT_COMMON;
                 switch (what){
                     case IMediaPlayer.MEDIA_ERROR_IO:
-                        eventCode = ErrorEvent.ERROR_EVENT_IO;
+                        event = ErrorEvent.ERROR_EVENT_IO;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_MALFORMED:
-                        eventCode = ErrorEvent.ERROR_EVENT_MALFORMED;
+                        event = ErrorEvent.ERROR_EVENT_MALFORMED;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_TIMED_OUT:
-                        eventCode = ErrorEvent.ERROR_EVENT_TIMED_OUT;
+                        event = ErrorEvent.ERROR_EVENT_TIMED_OUT;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_UNKNOWN:
-                        eventCode = ErrorEvent.ERROR_EVENT_UNKNOWN;
+                        event = ErrorEvent.ERROR_EVENT_UNKNOWN;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_UNSUPPORTED:
-                        eventCode = ErrorEvent.ERROR_EVENT_UNSUPPORTED;
+                        event = ErrorEvent.ERROR_EVENT_UNSUPPORTED;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                        eventCode = ErrorEvent.ERROR_EVENT_SERVER_DIED;
+                        event = ErrorEvent.ERROR_EVENT_SERVER_DIED;
                         break;
                     case IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                        eventCode = ErrorEvent.ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
+                        event = ErrorEvent.ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
                         break;
                 }
-                sendErrorEvent(eventCode);
-
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,what);
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EXTRA,extra);
+                sendErrorEvent(event,mBundle);
+                recycleBundle();
                 return true;
             }
         });
@@ -206,35 +201,35 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
         mMediaPlayer.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer iMediaPlayer,int what, int extra) {
-
+                int event = Event.EVENT_ON_COMMON;
                 switch (what){
                     case IMediaPlayer.MEDIA_INFO_AUDIO_DECODED_START:
                         LogUtils.d("MEDIA_INFO_AUDIO_DECODED_START");
-                        sendPlayerEvent(Event.EVENT_ON_AUDIO_DECODER_START);
+                        event = Event.EVENT_ON_AUDIO_DECODER_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
                         LogUtils.d("MEDIA_INFO_AUDIO_RENDERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_AUDIO_RENDER_START);
+                        event = Event.EVENT_ON_AUDIO_RENDER_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_AUDIO_SEEK_RENDERING_START:
                         LogUtils.d("MEDIA_INFO_AUDIO_SEEK_RENDERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_AUDIO_SEEK_RENDERING_START);
+                        event = Event.EVENT_ON_AUDIO_SEEK_RENDERING_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
                         LogUtils.d("MEDIA_INFO_BAD_INTERLEAVING");
-                        sendPlayerEvent(Event.EVENT_ON_BAD_INTERLEAVING);
+                        event = Event.EVENT_ON_BAD_INTERLEAVING;
                         break;
                     case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
                         LogUtils.d("MEDIA_INFO_BUFFERING_END");
-                        sendPlayerEvent(Event.EVENT_ON_BUFFERING_END);
+                        event = Event.EVENT_ON_BUFFERING_END;
                         break;
                     case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                         LogUtils.d("MEDIA_INFO_BUFFERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_BUFFERING_START);
+                        event = Event.EVENT_ON_BUFFERING_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_COMPONENT_OPEN:
                         LogUtils.d("MEDIA_INFO_COMPONENT_OPEN");
-                        sendPlayerEvent(Event.EVENT_ON_COMPONENT_OPEN);
+                        event = Event.EVENT_ON_COMPONENT_OPEN;
                         break;
                     case IMediaPlayer.MEDIA_INFO_FIND_STREAM_INFO:
                         LogUtils.d("MEDIA_INFO_FIND_STREAM_INFO");
@@ -244,15 +239,15 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                         break;
                     case IMediaPlayer.MEDIA_INFO_METADATA_UPDATE:
                         LogUtils.d("MEDIA_INFO_METADATA_UPDATE");
-                        sendPlayerEvent(Event.EVENT_ON_METADATA_UPDATE);
+                        event = Event.EVENT_ON_METADATA_UPDATE;
                         break;
                     case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
                         LogUtils.d("MEDIA_INFO_NETWORK_BANDWIDTH");
-                        sendPlayerEvent(Event.EVENT_ON_NETWORK_BANDWIDTH);
+                        event = Event.EVENT_ON_NETWORK_BANDWIDTH;
                         break;
                     case IMediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
                         LogUtils.d("MEDIA_INFO_NOT_SEEKABLE");
-                        sendPlayerEvent(Event.EVENT_ON_NOT_SEEK_ABLE);
+                        event = Event.EVENT_ON_NOT_SEEK_ABLE;
                         break;
                     case IMediaPlayer.MEDIA_INFO_OPEN_INPUT:
                         LogUtils.d("MEDIA_INFO_OPEN_INPUT");
@@ -262,27 +257,27 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                         break;
                     case IMediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
                         LogUtils.d("MEDIA_INFO_SUBTITLE_TIMED_OUT");
-                        sendPlayerEvent(Event.EVENT_ON_SUBTITLE_TIMED_OUT);
+                        event = Event.EVENT_ON_SUBTITLE_TIMED_OUT;
                         break;
                     case IMediaPlayer.MEDIA_INFO_TIMED_TEXT_ERROR:
                         LogUtils.d("MEDIA_INFO_TIMED_TEXT_ERROR");
-                        sendPlayerEvent(Event.EVENT_ON_TIMED_TEXT_ERROR);
+                        event = Event.EVENT_ON_TIMED_TEXT_ERROR;
                         break;
                     case IMediaPlayer.MEDIA_INFO_UNKNOWN:
                         LogUtils.d("MEDIA_INFO_UNKNOWN");
-                        sendPlayerEvent(Event.EVENT_ON_UNKNOWN);
+                        event = Event.EVENT_ON_UNKNOWN;
                         break;
                     case IMediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
                         LogUtils.d("MEDIA_INFO_UNSUPPORTED_SUBTITLE");
-                        sendPlayerEvent(Event.EVENT_ON_UNSUPPORTED_SUBTITLE);
+                        event = Event.EVENT_ON_UNSUPPORTED_SUBTITLE;
                         break;
                     case IMediaPlayer.MEDIA_INFO_VIDEO_DECODED_START:
                         LogUtils.d("MEDIA_INFO_VIDEO_DECODED_START");
-                        sendPlayerEvent(Event.EVENT_ON_VIDEO_DECODED_START);
+                        event = Event.EVENT_ON_VIDEO_DECODED_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                         LogUtils.d("MEDIA_INFO_VIDEO_RENDERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_VIDEO_RENDER_START);
+                        event = Event.EVENT_ON_VIDEO_RENDER_START;
                         break;
                     case IMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED:
                         LogUtils.d("MEDIA_INFO_VIDEO_RENDERING_START");
@@ -297,6 +292,11 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                         LogUtils.d("onInfo:" + what);
                         break;
                 }
+
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,what);
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EXTRA,extra);
+                sendPlayerEvent(event,mBundle);
+                recycleBundle();
 
                 return true;
 
@@ -322,6 +322,13 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
         }
     }
 
+    private void recycleBundle(){
+        if(mBundle != null){
+            mBundle.clear();
+        }
+    }
+
+
     private boolean available(){
         return mMediaPlayer != null;
     }
@@ -342,6 +349,8 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 LogUtils.d("start");
                 sendPlayerEvent(Event.EVENT_ON_START);
 
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -359,6 +368,8 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 mCurrentState = STATE_PAUSED;
                 sendPlayerEvent(Event.EVENT_ON_PAUSE);
                 LogUtils.d("pause");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -377,6 +388,8 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
                 mCurrentState = STATE_STOPPED;
                 sendPlayerEvent(Event.EVENT_ON_STOP);
                 LogUtils.d("stop");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -422,15 +435,10 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
     @Override
     public void setVolume(float volume) {
         if(available()){
-            mVolume = volume;
             mMediaPlayer.setVolume(volume,volume);
         }
     }
 
-    @Override
-    public float getVolume() {
-        return mVolume;
-    }
 
     @Override
     public void seekTo(int msec) {
@@ -506,11 +514,13 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.setDisplay(surfaceHolder);
         mMediaPlayer.setScreenOnWhilePlaying(true);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_HOLDER_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.setSurface(surface);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override

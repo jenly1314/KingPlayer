@@ -69,6 +69,7 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
         if(e != null){
             LogUtils.e(e);
         }
+        sendErrorEvent(ErrorEvent.ERROR_EVENT_EXCEPTION);
         if(isReset){
             reset();
         }
@@ -159,39 +160,39 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
     public final static class EventBundleKey{
         public static final String KEY_TIME = "event_time";
         public static final String KEY_POSITION = "event_position";
-        public static final String KEY_BUFFERING_PERCENT = "event_buffering_percent";
-        public static final String KEY_LENGTH = "event_length";
         public static final String KEY_VIDEO_WIDTH = "event_video_width";
         public static final String KEY_VIDEO_HEIGHT = "event_height";
-        public static final String KEY_EXTRA = "event_extra";
+        public static final String KEY_ORIGINAL_EVENT = "event_original_event";
+        public static final String KEY_ORIGINAL_EXTRA = "event_original_extra";
     }
 
     @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorEvent{
 
-        int ERROR_EVENT_DATA_PROVIDER_ERROR = 0x9000;
+        int ERROR_EVENT_COMMON = 0x9000;
 
-        //A error that causes a play to terminate
-        int ERROR_EVENT_COMMON = 0x9011;
+        int ERROR_EVENT_UNKNOWN = 0x9001;
 
-        int ERROR_EVENT_UNKNOWN = 0x9012;
+        int ERROR_EVENT_SERVER_DIED = 0x9002;
 
-        int ERROR_EVENT_SERVER_DIED = 0x9013;
+        int ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 0x9003;
 
-        int ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 0x9014;
+        int ERROR_EVENT_IO = 0x9004;
 
-        int ERROR_EVENT_IO = 0x9015;
+        int ERROR_EVENT_MALFORMED = 0x9005;
 
-        int ERROR_EVENT_MALFORMED = 0x9016;
+        int ERROR_EVENT_UNSUPPORTED = 0x9006;
 
-        int ERROR_EVENT_UNSUPPORTED = 0x9017;
+        int ERROR_EVENT_TIMED_OUT = 0x9007;
 
-        int ERROR_EVENT_TIMED_OUT = 0x9018;
+        int ERROR_EVENT_EXCEPTION = 0x9008;
     }
 
 
     @Retention(RetentionPolicy.SOURCE)
     public @interface Event {
+
+        int EVENT_ON_COMMON = 0x1000;
 
         /**
          * when decoder set data source
@@ -218,160 +219,133 @@ public abstract class KingPlayer<Player> implements IPlayer<Player>, ISurface {
          */
         int EVENT_ON_PAUSE = 0x1005;
 
-//        /**
-//         * when you call {@link IPlayer#resume()}
-//         */
-//        int EVENT_ON_RESUME = 0x1006;
-
         /**
          * when you call {@link IPlayer#stop()}
          */
-        int EVENT_ON_STOP = 0x1007;
+        int EVENT_ON_STOP = 0x1006;
 
         /**
          * when you call {@link IPlayer#release()}
          */
-        int EVENT_ON_RELEASE = 0x1008;
-
+        int EVENT_ON_RELEASE = 0x1007;
 
         /**
          * when you call {@link IPlayer#reset()}
          */
-        int EVENT_ON_RESET = 0x1009;
+        int EVENT_ON_RESET = 0x1008;
 
         /**
          * when decoder start buffering stream
          */
-        int EVENT_ON_BUFFERING_START = 0x1010;
+        int EVENT_ON_BUFFERING_START = 0x1009;
 
         /**
          * when decoder buffering stream end
          */
-        int EVENT_ON_BUFFERING_END = 0x1011;
+        int EVENT_ON_BUFFERING_END = 0x1010;
 
-        /**
-         * when decoder buffering percentage update
-         */
-        int EVENT_ON_BUFFERING_UPDATE = 0x1012;
 
         /**
          * when you call {@link IPlayer#seekTo(int)}
          */
-        int EVENT_ON_SEEK_TO = 0x1013;
+        int EVENT_ON_SEEK_TO = 0x1011;
 
         /**
          * when seek complete
          */
-        int EVENT_ON_SEEK_COMPLETE = 0x1014;
+        int EVENT_ON_SEEK_COMPLETE = 0x1012;
 
         /**
          * when player start render video stream
          */
-        int EVENT_ON_VIDEO_RENDER_START = 0x1015;
+        int EVENT_ON_VIDEO_RENDER_START = 0x1013;
 
         /**
          * when play complete
          */
-        int EVENT_ON_PLAY_COMPLETE = 0x1016;
+        int EVENT_ON_PLAY_COMPLETE = 0x1014;
 
         /**
          * on video size change
          */
-        int EVENT_ON_VIDEO_SIZE_CHANGE = 0x1017;
+        int EVENT_ON_VIDEO_SIZE_CHANGE = 0x1015;
 
         /**
          * on decoder prepared
          */
-        int EVENT_ON_PREPARED = 0x1018;
+        int EVENT_ON_PREPARED = 0x1016;
 
         /**
          * on player timer counter update
          * if timer stopped, you could not receive this event code.
          */
-        int EVENT_ON_TIMER_UPDATE = 0x1019;
+        int EVENT_ON_TIMER_UPDATE = 0x1017;
 
         /**
          * on get video rotation.
          */
-        int EVENT_ON_VIDEO_ROTATION_CHANGED = 99020;
+        int EVENT_ON_VIDEO_ROTATION_CHANGED = 0x1018;
 
         /**
          * when player start render audio stream
          */
-        int EVENT_ON_AUDIO_RENDER_START = 0x1021;
+        int EVENT_ON_AUDIO_RENDER_START = 0x1019;
 
         /**
          * when audio decoder start
          */
-        int EVENT_ON_AUDIO_DECODER_START = 0x1022;
+        int EVENT_ON_AUDIO_DECODER_START = 0x1020;
 
         /**
          * when audio seek rendering start
          */
-        int EVENT_ON_AUDIO_SEEK_RENDERING_START = 0x1023;
+        int EVENT_ON_AUDIO_SEEK_RENDERING_START = 0x1021;
 
         /**
          * network bandwidth
          */
-        int EVENT_ON_NETWORK_BANDWIDTH = 0x1024;
+        int EVENT_ON_NETWORK_BANDWIDTH = 0x1022;
 
         /**
          * bad interleaving
          */
-        int EVENT_ON_BAD_INTERLEAVING = 0x1025;
+        int EVENT_ON_BAD_INTERLEAVING = 0x1023;
 
         /**
          * not support seek ,may be live.
          */
-        int EVENT_ON_NOT_SEEK_ABLE = 0x1026;
+        int EVENT_ON_NOT_SEEK_ABLE = 0x1024;
 
         /**
          * on meta data update
          */
-        int EVENT_ON_METADATA_UPDATE = 0x1027;
+        int EVENT_ON_METADATA_UPDATE = 0x1025;
 
         /**
          * Failed to handle timed text track properly.
          */
-        int EVENT_ON_TIMED_TEXT_ERROR = 0x1028;
+        int EVENT_ON_TIMED_TEXT_ERROR = 0x1026;
 
         /**
          * Subtitle track was not supported by the media framework.
          */
-        int EVENT_ON_UNSUPPORTED_SUBTITLE = 0x1029;
+        int EVENT_ON_UNSUPPORTED_SUBTITLE = 0x1027;
 
         /**
          * Reading the subtitle track takes too long.
          */
-        int EVENT_ON_SUBTITLE_TIMED_OUT = 0x1030;
+        int EVENT_ON_SUBTITLE_TIMED_OUT = 0x1028;
 
         /**
          * on play status update
          */
-        int EVENT_ON_STATUS_CHANGE = 0x1031;
+        int EVENT_ON_STATUS_CHANGE = 0x1029;
 
+        int EVENT_ON_UNKNOWN = 0x1030;
 
+        int EVENT_ON_VIDEO_DECODED_START = 0x1031;
 
-        /**
-         * if you set data provider for player, call back this method when provider start load data.
-         */
-        int EVENT_ON_PROVIDER_DATA_START = 0x1050;
-
-        /**
-         * call back this method when provider load data success.
-         */
-        int EVENT_ON_PROVIDER_DATA_SUCCESS = 0x1051;
-
-        /**
-         * call back this method when provider load data error.
-         */
-        int EVENT_ON_PROVIDER_DATA_ERROR = 0x1052;
-
-        int EVENT_ON_UNKNOWN = 0x1053;
-
-        int EVENT_ON_VIDEO_DECODED_START = 0x1054;
-
-        int EVENT_ON_COMPONENT_OPEN = 0x1055;
+        int EVENT_ON_COMPONENT_OPEN = 0x1032;
 
     }
 

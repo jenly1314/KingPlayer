@@ -3,6 +3,7 @@ package com.king.player.kingplayer.source;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.io.IOException;
@@ -106,6 +107,8 @@ public class DataSource {
         }
         return null;
     }
+
+
 
     @Override
     public String toString() {

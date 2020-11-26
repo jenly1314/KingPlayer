@@ -13,6 +13,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.king.player.kingplayer.KingPlayer;
 import com.king.player.kingplayer.source.DataSource;
@@ -22,7 +23,6 @@ import com.king.player.vlcplayer.source.VlcDataSource;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
-import org.videolan.libvlc.interfaces.ILibVLC;
 import org.videolan.libvlc.interfaces.IMedia;
 import org.videolan.libvlc.interfaces.IVLCVout;
 
@@ -34,13 +34,13 @@ import java.util.Collection;
  */
 public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNewVideoLayoutListener {
 
-    private ILibVLC mLibVLC;
-
     private MediaPlayer mMediaPlayer;
 
     private Context mContext;
 
     private DataSource mDataSource;
+
+    private Media mMedia;
 
     private HandlerThread mHandlerThread;
     private Handler mWorkHandler;
@@ -51,15 +51,21 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     private static final int INIT_STOP = 3;
     private static final int INIT_RELEASE = 4;
     private static final int INIT_RESET = 5;
+    private static final int INIT_DATA_SOURCE = 6;
 
     private Bundle mBundle = obtainBundle();
 
     public VlcPlayer(@NonNull Context context){
         mContext = context.getApplicationContext();
-        final ArrayList<String> args = new ArrayList<>();
-        args.add("-vvv");
-        mLibVLC = new LibVLC(context,args);
-        mMediaPlayer = new MediaPlayer(mLibVLC);
+        LibVLC libVLC = new LibVLC(context);
+        mMediaPlayer = new MediaPlayer(libVLC);
+        initHandlerThread();
+    }
+
+    public VlcPlayer(@NonNull Context context, @Nullable ArrayList<String> options){
+        mContext = context.getApplicationContext();
+        LibVLC libVLC = new LibVLC(context,options);
+        mMediaPlayer = new MediaPlayer(libVLC);
         initHandlerThread();
     }
 
@@ -91,6 +97,9 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                     case INIT_RESET:
                         onReset();
                         break;
+                    case INIT_DATA_SOURCE:
+                        onLoadMedia();
+                        break;
                 }
                 mMainHandler.obtainMessage(msg.what).sendToTarget();
                 return true;
@@ -117,9 +126,30 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                     case INIT_RESET:
                         sendPlayerEvent(Event.EVENT_ON_RESET);
                         break;
+                    case INIT_DATA_SOURCE:
+                        mCurrentState = STATE_PREPARED;
+                        if (mTargetState == STATE_PLAYING) {
+                            start();
+                        }else if(mTargetState == STATE_PAUSED){
+                            pause();
+                        }else if(mTargetState == STATE_STOPPED
+                                || mTargetState == STATE_IDLE){
+                            reset();
+                        }
+                        sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
+                        break;
+
                 }
             }
         };
+
+    }
+
+    private void onLoadMedia(){
+        if(mMedia != null){
+            mMediaPlayer.setMedia(mMedia);
+            mMedia.release();
+        }
 
     }
 
@@ -127,20 +157,19 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     @Override
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.getVLCVout().setVideoSurface(surfaceHolder.getSurface(),surfaceHolder);
-        addListener();
-
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_HOLDER_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.getVLCVout().setVideoSurface(surface,null);
-        addListener();
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull SurfaceTexture surfaceTexture) {
         mMediaPlayer.getVLCVout().setVideoSurface(surfaceTexture);
-        addListener();
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override
@@ -160,12 +189,10 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     public void setDataSource(@NonNull DataSource dataSource) {
         try {
             if(mDataSource != null){
-                stop();
-                reset();
                 resetListener();
             }
-
             mDataSource = dataSource;
+            addListener();
             Media media = null;
             if(!TextUtils.isEmpty(mDataSource.getPath())){
                 if (mDataSource.getPath().contains("://")) {
@@ -211,25 +238,21 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                                 break;
                         }
 
-
                     }
                 });
-                mMediaPlayer.setMedia(media);
-                media.release();
-
-                mCurrentState = STATE_PREPARED;
+                mMedia = media;
+                mCurrentState = STATE_PREPARING;
                 mTargetState = STATE_PREPARING;
-                sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
+                mWorkHandler.obtainMessage(INIT_DATA_SOURCE).sendToTarget();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            handleException(e,false);
             mCurrentState = STATE_ERROR;
-            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
 
     }
 
-    public void initOptions(IMedia media, Collection<String> options){
+    public void initOptions(@NonNull IMedia media, @Nullable Collection<String> options){
         if(options != null){
             for(String option: options){
                 media.addOption(option);
@@ -250,17 +273,18 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
         mMediaPlayer.setEventListener(new MediaPlayer.EventListener() {
             @Override
             public void onEvent(MediaPlayer.Event event) {
+                int what = Event.EVENT_ON_COMMON;
                 switch (event.type){
                     case MediaPlayer.Event.Buffering:
                         LogUtils.d(String.format("Event.Buffering: 0x%s",Integer.toHexString(event.type)));
                         int buffering = (int)event.getBuffering();
                         if(buffering == 0){
-                            sendPlayerEvent(Event.EVENT_ON_BUFFERING_START);
+                            what = Event.EVENT_ON_BUFFERING_START;
                         }
                         sendBufferingUpdateEvent(buffering);
 
                         if(buffering == 100){
-                            sendPlayerEvent(Event.EVENT_ON_BUFFERING_END);
+                            what = Event.EVENT_ON_BUFFERING_END;
                         }
                         break;
                     case MediaPlayer.Event.EncounteredError:
@@ -281,53 +305,52 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                         break;
                     case MediaPlayer.Event.MediaChanged:
                         LogUtils.d(String.format("Event.MediaChanged: 0x%s",Integer.toHexString(event.type)));
-                        sendPlayerEvent(Event.EVENT_ON_METADATA_UPDATE);
+                        what = Event.EVENT_ON_METADATA_UPDATE;
                         break;
                     case MediaPlayer.Event.Opening:
                         LogUtils.d(String.format("Event.Opening: 0x%s",Integer.toHexString(event.type)));
-                        mCurrentState = STATE_PREPARED;
                         break;
                     case MediaPlayer.Event.PausableChanged:
                         LogUtils.d(String.format("Event.PausableChanged: 0x%s",Integer.toHexString(event.type)));
                         break;
                     case MediaPlayer.Event.Paused:
                         LogUtils.d(String.format("Event.Paused: 0x%s",Integer.toHexString(event.type)));
-                        mCurrentState = STATE_PAUSED;
                         break;
                     case MediaPlayer.Event.Playing:
                         LogUtils.d(String.format("Event.Playing: 0x%s",Integer.toHexString(event.type)));
-                        mCurrentState = STATE_PLAYING;
                         break;
                     case MediaPlayer.Event.PositionChanged:
                         LogUtils.d(String.format("Event.PositionChanged: 0x%s",Integer.toHexString(event.type)));
+                        what = Event.EVENT_ON_TIMER_UPDATE;
                         mBundle.putInt(EventBundleKey.KEY_POSITION,(int)event.getPositionChanged());
-                        sendPlayerEvent(Event.EVENT_ON_TIMER_UPDATE,mBundle);
                         break;
                     case MediaPlayer.Event.RecordChanged:
-
                         LogUtils.d(String.format("Event.RecordChanged: 0x%s",Integer.toHexString(event.type)));
                         break;
                     case MediaPlayer.Event.SeekableChanged:
                         LogUtils.d(String.format("Event.SeekableChanged: 0x%s",Integer.toHexString(event.type)));
-                        sendPlayerEvent(Event.EVENT_ON_SEEK_COMPLETE,mBundle);
+                        what = Event.EVENT_ON_SEEK_COMPLETE;
                         break;
                     case MediaPlayer.Event.Stopped:
                         LogUtils.d(String.format("Event.Stopped: 0x%s",Integer.toHexString(event.type)));
-                        mCurrentState = STATE_STOPPED;
                         break;
                     case MediaPlayer.Event.TimeChanged:
                         LogUtils.d(String.format("Event.TimeChanged: 0x%s",Integer.toHexString(event.type)));
+                        what = Event.EVENT_ON_TIMER_UPDATE;
                         mBundle.putInt(EventBundleKey.KEY_TIME,(int)event.getTimeChanged());
-                        sendPlayerEvent(Event.EVENT_ON_TIMER_UPDATE,mBundle);
                         break;
                     case MediaPlayer.Event.Vout:
                         LogUtils.d(String.format("Event.Vout: 0x%s",Integer.toHexString(event.type)));
                         break;
                 }
+
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,event.type);
+                sendPlayerEvent(what,mBundle);
                 recycleBundle();
             }
         });
         mMediaPlayer.getVLCVout().attachViews(this);
+
         mMediaPlayer.setVideoTrackEnabled(true);
         mMediaPlayer.setAspectRatio(null);
         mMediaPlayer.setScale(0);
@@ -401,6 +424,8 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                     || mCurrentState == STATE_PLAYING
                     || mCurrentState == STATE_PLAYBACK_COMPLETED)){
                 mWorkHandler.obtainMessage(INIT_PAUSE).sendToTarget();
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -417,8 +442,13 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
 
     @Override
     public void stop() {
-        if(hasDataSource() && !isReleased()){
+        if(hasDataSource() && (mCurrentState == STATE_PREPARED
+                || mCurrentState == STATE_PLAYING
+                || mCurrentState == STATE_PAUSED
+                || mCurrentState == STATE_PLAYBACK_COMPLETED)){
             mWorkHandler.obtainMessage(INIT_STOP).sendToTarget();
+        }else{
+            LogUtils.d("currentState = " + mCurrentState);
         }
         mTargetState = STATE_STOPPED;
     }
@@ -478,12 +508,18 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
 
     @Override
     public boolean isPlaying() {
-        return mMediaPlayer.isPlaying();
+        if(available()){
+            return mMediaPlayer.isPlaying();
+        }
+        return false;
     }
 
     @Override
     public int getPlayerState() {
-        return mMediaPlayer.getPlayerState();
+        if(available()){
+            return mMediaPlayer.getPlayerState();
+        }
+        return super.getPlayerState();
     }
 
     @Override
@@ -493,13 +529,6 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
         }
     }
 
-    @Override
-    public float getVolume() {
-        if(available()){
-            return mMediaPlayer.getVolume();
-        }
-        return -1;
-    }
 
     @Override
     public void seekTo(int msec) {

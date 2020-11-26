@@ -20,7 +20,7 @@ import com.king.player.core.R;
 import com.king.player.kingplayer.AspectRatio;
 import com.king.player.kingplayer.KingPlayer;
 import com.king.player.kingplayer.source.DataSource;
-import com.king.player.kingplayer.IMeasureSurface;
+import com.king.player.kingplayer.measure.IMeasureSurface;
 import com.king.player.kingplayer.IPlayer;
 
 /**
@@ -283,7 +283,9 @@ public class VideoView extends FrameLayout implements IMeasureSurface, IPlayer<K
 
     @Override
     public void setDataSource(@NonNull DataSource dataSource) {
-        mPlayer.setDataSource(dataSource);
+        if(mPlayer != null){
+            mPlayer.setDataSource(dataSource);
+        }
     }
 
     @Override
@@ -326,10 +328,6 @@ public class VideoView extends FrameLayout implements IMeasureSurface, IPlayer<K
         mPlayer.setVolume(volume);
     }
 
-    @Override
-    public float getVolume() {
-        return mPlayer.getVolume();
-    }
 
     @Override
     public void seekTo(int msec) {

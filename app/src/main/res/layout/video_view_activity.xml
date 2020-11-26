@@ -10,6 +10,5 @@
     <com.king.player.kingplayer.view.VideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:vvUseSurfaceView="true"/>
+        android:layout_height="match_parent" />
 </LinearLayout>

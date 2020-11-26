@@ -5,7 +5,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:ignore="MissingDefaultResource">
+    tools:ignore="MissingDefaultResource"
+    android:background="@color/black">
     <com.king.player.kingplayer.view.KingSurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"

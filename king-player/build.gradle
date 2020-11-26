@@ -37,5 +37,5 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$versions.androidExtJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
 
-    api "androidx.appcompat:appcompat:$versions.appcompat"
+    api "androidx.annotation:annotation:$versions.annotation"
 }

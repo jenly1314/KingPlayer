@@ -1,41 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:layout_margin="30dp">
 
     <Button
+        android:id="@+id/btnIjkPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="IjkPlayer"
+        style="@style/OnClick"/>
+    <Button
+        android:id="@+id/btnExoPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="ExoPlayer"
+        style="@style/OnClick"/>
+    <Button
+        android:id="@+id/btnVlcPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="VlcPlayer"
+        style="@style/OnClick"/>
+    <Button
+        android:id="@+id/btnSysPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="SysPlayer"
+        style="@style/OnClick"/>
+    <Button
         android:id="@+id/btnSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="SurfaceView"
-        app:layout_constraintBottom_toTopOf="@+id/btnTextureView"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         style="@style/OnClick"/>
     <Button
         android:id="@+id/btnTextureView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextureView"
-        android:layout_marginTop="20dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnSurfaceView"
+        android:layout_marginTop="10dp"
         style="@style/OnClick"/>
     <Button
         android:id="@+id/btnVideoView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="VideoView"
-        android:layout_marginTop="20dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTextureView"
+        android:layout_marginTop="10dp"
         style="@style/OnClick"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

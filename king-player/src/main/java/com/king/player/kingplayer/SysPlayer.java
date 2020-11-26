@@ -1,4 +1,4 @@
-package com.king.player.kingplayer.media;
+package com.king.player.kingplayer;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -13,7 +13,6 @@ import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
 
-import com.king.player.kingplayer.KingPlayer;
 import com.king.player.kingplayer.source.DataSource;
 import com.king.player.kingplayer.util.LogUtils;
 
@@ -28,29 +27,30 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
 
     private Context mContext;
 
-    private float mVolume;
-
     private DataSource mDataSource;
 
+    private Bundle mBundle = obtainBundle();
 
     public SysPlayer(@NonNull Context context){
-        this(context,new MediaPlayer());
+        this(context,null);
     }
 
     public SysPlayer(@NonNull Context context,MediaPlayer mediaPlayer){
         this.mContext = context.getApplicationContext();
-        this.mMediaPlayer = mediaPlayer;
+        this.mMediaPlayer = mediaPlayer != null ? mediaPlayer : new MediaPlayer();
     }
 
     @Override
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.setDisplay(surfaceHolder);
         mMediaPlayer.setScreenOnWhilePlaying(true);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_HOLDER_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.setSurface(surface);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override
@@ -103,34 +103,35 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
         mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                mCurrentState = STATE_ERROR;
-                mTargetState = STATE_ERROR;
                 LogUtils.w("onError: " + what + ", extra:" + extra);
-                int eventCode = ErrorEvent.ERROR_EVENT_COMMON;
+                int event = ErrorEvent.ERROR_EVENT_COMMON;
                 switch (what){
                     case MediaPlayer.MEDIA_ERROR_IO:
-                        eventCode = ErrorEvent.ERROR_EVENT_IO;
+                        event = ErrorEvent.ERROR_EVENT_IO;
                         break;
                     case MediaPlayer.MEDIA_ERROR_MALFORMED:
-                        eventCode = ErrorEvent.ERROR_EVENT_MALFORMED;
+                        event = ErrorEvent.ERROR_EVENT_MALFORMED;
                         break;
                     case MediaPlayer.MEDIA_ERROR_TIMED_OUT:
-                        eventCode = ErrorEvent.ERROR_EVENT_TIMED_OUT;
+                        event = ErrorEvent.ERROR_EVENT_TIMED_OUT;
                         break;
                     case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                        eventCode = ErrorEvent.ERROR_EVENT_UNKNOWN;
+                        event = ErrorEvent.ERROR_EVENT_UNKNOWN;
                         break;
                     case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
-                        eventCode = ErrorEvent.ERROR_EVENT_UNSUPPORTED;
+                        event = ErrorEvent.ERROR_EVENT_UNSUPPORTED;
                         break;
                     case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                        eventCode = ErrorEvent.ERROR_EVENT_SERVER_DIED;
+                        event = ErrorEvent.ERROR_EVENT_SERVER_DIED;
                         break;
                     case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                        eventCode = ErrorEvent.ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
+                        event = ErrorEvent.ERROR_EVENT_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
                         break;
                 }
-                sendErrorEvent(eventCode);
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,what);
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EXTRA,extra);
+                sendErrorEvent(event,mBundle);
+                recycleBundle();
                 return true;
             }
         });
@@ -138,52 +139,52 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
         mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(MediaPlayer mp, int what, int extra) {
-
+                int event = Event.EVENT_ON_COMMON;
                 switch (what){
                     case MediaPlayer.MEDIA_INFO_AUDIO_NOT_PLAYING:
                         LogUtils.d("MEDIA_INFO_AUDIO_NOT_PLAYING");
                         break;
                     case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
                         LogUtils.d("MEDIA_INFO_BAD_INTERLEAVING");
-                        sendPlayerEvent(Event.EVENT_ON_BAD_INTERLEAVING);
+                        event = Event.EVENT_ON_BAD_INTERLEAVING;
                         break;
                     case MediaPlayer.MEDIA_INFO_BUFFERING_END:
                         LogUtils.d("MEDIA_INFO_BUFFERING_END");
-                        sendPlayerEvent(Event.EVENT_ON_BUFFERING_END);
+                        event = Event.EVENT_ON_BUFFERING_END;
                         break;
                     case MediaPlayer.MEDIA_INFO_BUFFERING_START:
                         LogUtils.d("MEDIA_INFO_BUFFERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_BUFFERING_START);
+                        event = Event.EVENT_ON_BUFFERING_START;
                         break;
                     case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
                         LogUtils.d("MEDIA_INFO_METADATA_UPDATE");
-                        sendPlayerEvent(Event.EVENT_ON_METADATA_UPDATE);
+                        event = Event.EVENT_ON_METADATA_UPDATE;
                         break;
                     case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
                         LogUtils.d("MEDIA_INFO_NOT_SEEKABLE");
-                        sendPlayerEvent(Event.EVENT_ON_NOT_SEEK_ABLE);
+                        event = Event.EVENT_ON_NOT_SEEK_ABLE;
                         break;
                     case MediaPlayer.MEDIA_INFO_STARTED_AS_NEXT:
                         LogUtils.d("MEDIA_INFO_STARTED_AS_NEXT");
                         break;
                     case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
                         LogUtils.d("MEDIA_INFO_SUBTITLE_TIMED_OUT");
-                        sendPlayerEvent(Event.EVENT_ON_SUBTITLE_TIMED_OUT);
+                        event = Event.EVENT_ON_SUBTITLE_TIMED_OUT;
                         break;
                     case MediaPlayer.MEDIA_INFO_UNKNOWN:
                         LogUtils.d("MEDIA_INFO_UNKNOWN");
-                        sendPlayerEvent(Event.EVENT_ON_UNKNOWN);
+                        event = Event.EVENT_ON_UNKNOWN;
                         break;
                     case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
                         LogUtils.d("MEDIA_INFO_UNSUPPORTED_SUBTITLE");
-                        sendPlayerEvent(Event.EVENT_ON_UNSUPPORTED_SUBTITLE);
+                        event = Event.EVENT_ON_UNSUPPORTED_SUBTITLE;
                         break;
                     case MediaPlayer.MEDIA_INFO_VIDEO_NOT_PLAYING:
                         LogUtils.d("MEDIA_INFO_VIDEO_NOT_PLAYING");
                         break;
                     case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                         LogUtils.d("MEDIA_INFO_VIDEO_RENDERING_START");
-                        sendPlayerEvent(Event.EVENT_ON_VIDEO_RENDER_START);
+                        event = Event.EVENT_ON_VIDEO_RENDER_START;
                         break;
                     case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
                         LogUtils.d("MEDIA_INFO_VIDEO_TRACK_LAGGING");
@@ -193,6 +194,10 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                         break;
                 }
 
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,what);
+                mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EXTRA,extra);
+                sendPlayerEvent(event,mBundle);
+                recycleBundle();
                 return true;
             }
         });
@@ -208,6 +213,13 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
             mMediaPlayer.setOnInfoListener(null);
         }
     }
+
+    private void recycleBundle(){
+        if(mBundle != null){
+            mBundle.clear();
+        }
+    }
+
 
     @Override
     public void updateSurface(int width, int height) {
@@ -267,9 +279,8 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
             mTargetState = STATE_PREPARING;
             sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleException(e,false);
             mCurrentState = STATE_ERROR;
-            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
     }
 
@@ -286,12 +297,15 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
         try{
             if(hasDataSource() && (mCurrentState == STATE_PREPARED
                     || mCurrentState == STATE_PAUSED
+                    || mCurrentState == STATE_STOPPED
                     || mCurrentState == STATE_PLAYBACK_COMPLETED)){
                 mMediaPlayer.start();
                 mCurrentState = STATE_PLAYING;
                 LogUtils.d("start");
                 sendPlayerEvent(Event.EVENT_ON_START);
 
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -309,6 +323,8 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                 mCurrentState = STATE_PAUSED;
                 sendPlayerEvent(Event.EVENT_ON_PAUSE);
                 LogUtils.d("pause");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -327,6 +343,8 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
                 mCurrentState = STATE_STOPPED;
                 sendPlayerEvent(Event.EVENT_ON_STOP);
                 LogUtils.d("stop");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -373,14 +391,8 @@ public class SysPlayer extends KingPlayer<MediaPlayer> {
     @Override
     public void setVolume(float volume) {
         if(available()){
-            mVolume = volume;
             mMediaPlayer.setVolume(volume,volume);
         }
-    }
-
-    @Override
-    public float getVolume() {
-        return mVolume;
     }
 
     @Override

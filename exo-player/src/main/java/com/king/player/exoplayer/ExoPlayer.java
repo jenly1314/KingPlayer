@@ -55,27 +55,28 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
 
     private Context mContext;
 
-    private float mVolume;
-
     private DataSource mDataSource;
 
-    public ExoPlayer(Context context){
-        this.mContext = context.getApplicationContext();
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(mContext);
-        DefaultTrackSelector trackSelector = new DefaultTrackSelector(mContext);
-        mMediaPlayer = new SimpleExoPlayer.Builder(mContext, renderersFactory)
-                .setTrackSelector(trackSelector).build();
-        init();
+    private Bundle mBundle = obtainBundle();
+
+    public ExoPlayer(@NonNull Context context){
+        this(context,null);
     }
 
-    public ExoPlayer(Context context, SimpleExoPlayer mediaPlayer){
+    public ExoPlayer(@NonNull Context context,@Nullable SimpleExoPlayer mediaPlayer){
         this.mContext = context.getApplicationContext();
-        this.mMediaPlayer = mediaPlayer;
-        init();
+        init(mediaPlayer);
     }
 
 
-    private void init(){
+    private void init(SimpleExoPlayer mediaPlayer){
+        if(mediaPlayer == null){
+            RenderersFactory renderersFactory = new DefaultRenderersFactory(mContext);
+            DefaultTrackSelector trackSelector = new DefaultTrackSelector(mContext);
+            mMediaPlayer = new SimpleExoPlayer.Builder(mContext,renderersFactory).setTrackSelector(trackSelector).build();
+        }else{
+            mMediaPlayer = mediaPlayer;
+        }
         addListener();
     }
 
@@ -85,7 +86,6 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
         //TODO
 
         try{
-
             MediaSource mediaSource = obtainMediaSource(dataSource);
             if(mediaSource != null){
                 mDataSource = dataSource;
@@ -93,14 +93,14 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
 
                 mMediaPlayer.prepare();
 
-                mCurrentState = STATE_PREPARING;
+                mCurrentState = STATE_PREPARED;
                 mTargetState = STATE_PREPARING;
                 sendPlayerEvent(Event.EVENT_ON_DATA_SOURCE_SET);
             }else{
                 LogUtils.w("mediaSource = null");
             }
         }catch (Exception e){
-            e.printStackTrace();
+            handleException(e,false);
             mCurrentState = STATE_ERROR;
             sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
         }
@@ -166,7 +166,6 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
         if(available()){
             mMediaPlayer.addVideoListener(mVideoListener);
             mMediaPlayer.addListener(mEventListener);
-            mMediaPlayer.addAudioListener(mAudioListener);
         }
 
     }
@@ -175,9 +174,15 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
         if(available()){
             mMediaPlayer.removeVideoListener(mVideoListener);
             mMediaPlayer.removeListener(mEventListener);
-            mMediaPlayer.removeAudioListener(mAudioListener);
         }
     }
+
+    private void recycleBundle(){
+        if(mBundle != null){
+            mBundle.clear();
+        }
+    }
+
 
     private VideoListener mVideoListener = new VideoListener() {
         @Override
@@ -193,13 +198,14 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
         @Override
         public void onRenderedFirstFrame() {
             sendPlayerEvent(Event.EVENT_ON_VIDEO_RENDER_START);
+
         }
     };
 
     private EventListener mEventListener = new EventListener() {
         @Override
         public void onTimelineChanged(Timeline timeline, int reason) {
-
+            sendPlayerEvent(Event.EVENT_ON_TIMER_UPDATE);
         }
 
         @Override
@@ -226,84 +232,95 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
         public void onPlaybackStateChanged(int state) {
             switch (state){
                 case Player.STATE_READY:
+                    LogUtils.d("Player.STATE_READY");
                     break;
                 case Player.STATE_BUFFERING:
+                    LogUtils.d("Player.STATE_BUFFERING");
                     sendBufferingUpdateEvent((int)getBufferPercentage());
                     break;
                 case Player.STATE_ENDED:
+                    LogUtils.d("Player.STATE_ENDED");
                     sendPlayerEvent(Event.EVENT_ON_PLAY_COMPLETE);
                     break;
                 case Player.STATE_IDLE:
+                    LogUtils.d("Player.STATE_IDLE");
                     break;
             }
+            mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,state);
+            sendPlayerEvent(Event.EVENT_ON_STATUS_CHANGE,mBundle);
+            recycleBundle();
         }
 
         @Override
         public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-
+            LogUtils.d("onPlayWhenReadyChanged: " + playWhenReady);
         }
 
         @Override
         public void onPlaybackSuppressionReasonChanged(int playbackSuppressionReason) {
-
+            LogUtils.d("onPlaybackSuppressionReasonChanged: " + playbackSuppressionReason);
         }
 
         @Override
         public void onIsPlayingChanged(boolean isPlaying) {
-
+            LogUtils.d("onIsPlayingChanged: " + isPlaying);
         }
 
         @Override
         public void onRepeatModeChanged(int repeatMode) {
-
+            LogUtils.d("onRepeatModeChanged: " + repeatMode);
         }
 
         @Override
         public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
+            LogUtils.d("onShuffleModeEnabledChanged: " + shuffleModeEnabled);
         }
 
         @Override
         public void onPlayerError(ExoPlaybackException error) {
             handleException(error,false);
-            sendErrorEvent(ErrorEvent.ERROR_EVENT_COMMON);
+            int event = ErrorEvent.ERROR_EVENT_COMMON;
+            switch (error.type){
+                case ExoPlaybackException.TYPE_OUT_OF_MEMORY:
+                    LogUtils.w("ExoPlaybackException.TYPE_OUT_OF_MEMORY");
+                    break;
+                case ExoPlaybackException.TYPE_REMOTE:
+                    LogUtils.w("ExoPlaybackException.TYPE_REMOTE");
+                    break;
+                case ExoPlaybackException.TYPE_RENDERER:
+                    LogUtils.w("ExoPlaybackException.TYPE_RENDERER");
+                    break;
+                case ExoPlaybackException.TYPE_SOURCE:
+                    LogUtils.w("ExoPlaybackException.TYPE_SOURCE");
+                    event = ErrorEvent.ERROR_EVENT_IO;
+                    break;
+                case ExoPlaybackException.TYPE_TIMEOUT:
+                    LogUtils.w("ExoPlaybackException.TYPE_TIMEOUT");
+                    event = ErrorEvent.ERROR_EVENT_TIMED_OUT;
+                    break;
+                case ExoPlaybackException.TYPE_UNEXPECTED:
+                    LogUtils.w("ExoPlaybackException.TYPE_UNEXPECTED");
+                    event = ErrorEvent.ERROR_EVENT_UNKNOWN;
+                    break;
+            }
+            mBundle.putInt(EventBundleKey.KEY_ORIGINAL_EVENT,error.type);
+            sendErrorEvent(event,mBundle);
+            recycleBundle();
         }
 
         @Override
         public void onPositionDiscontinuity(int reason) {
-
+            LogUtils.d("onPositionDiscontinuity: " + reason);
         }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
+            LogUtils.d("onPositionDiscontinuity: " + playbackParameters);
         }
 
         @Override
         public void onExperimentalOffloadSchedulingEnabledChanged(boolean offloadSchedulingEnabled) {
-
-        }
-    };
-
-    private AudioListener mAudioListener = new AudioListener() {
-        @Override
-        public void onAudioSessionId(int audioSessionId) {
-
-        }
-
-        @Override
-        public void onAudioAttributesChanged(AudioAttributes audioAttributes) {
-
-        }
-
-        @Override
-        public void onVolumeChanged(float volume) {
-            mVolume = volume;
-        }
-
-        @Override
-        public void onSkipSilenceEnabledChanged(boolean skipSilenceEnabled) {
-
+            LogUtils.d("onExperimentalOffloadSchedulingEnabledChanged: " + offloadSchedulingEnabled);
         }
     };
 
@@ -328,6 +345,8 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
                 LogUtils.d("start");
                 sendPlayerEvent(Event.EVENT_ON_START);
 
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -345,6 +364,8 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
                 mCurrentState = STATE_PAUSED;
                 sendPlayerEvent(Event.EVENT_ON_PAUSE);
                 LogUtils.d("pause");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -363,6 +384,8 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
                 mCurrentState = STATE_STOPPED;
                 sendPlayerEvent(Event.EVENT_ON_STOP);
                 LogUtils.d("stop");
+            }else{
+                LogUtils.d("currentState = " + mCurrentState);
             }
         }catch (Exception e){
             handleException(e,true);
@@ -408,14 +431,8 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
     @Override
     public void setVolume(float volume) {
         if(available()){
-            mVolume = volume;
             mMediaPlayer.setVolume(volume);
         }
-    }
-
-    @Override
-    public float getVolume() {
-        return mVolume;
     }
 
     @Override
@@ -500,16 +517,19 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
     @Override
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.setVideoSurfaceHolder(surfaceHolder);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_HOLDER_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.setVideoSurface(surface);
+        sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull SurfaceTexture surfaceTexture) {
         setSurface(new Surface(surfaceTexture));
+
     }
 
     @Override

@@ -1,6 +1,8 @@
-package com.king.player.kingplayer;
+package com.king.player.kingplayer.measure;
 
 import android.view.View;
+
+import com.king.player.kingplayer.AspectRatio;
 
 import java.lang.ref.WeakReference;
 
@@ -21,7 +23,8 @@ public final class MeasureHelper implements IMeasureSurface {
     private int mMeasuredWidth;
     private int mMeasuredHeight;
 
-    private @AspectRatio int mCurrentAspectRatio = AspectRatio.AR_ASPECT_FIT_PARENT;
+    private @AspectRatio
+    int mCurrentAspectRatio = AspectRatio.AR_ASPECT_FIT_PARENT;
 
     public MeasureHelper(View view) {
         mWeakView = new WeakReference<View>(view);
