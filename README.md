@@ -13,10 +13,10 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 ## 功能说明
 - [x] 主要播放相关核心功能
 - [x] 播放器无缝切换
-  - [x] MediaPlayer封装实现
+  - [x] MediaPlayer封装实现（SysPlayer）
   - [x] IjkPlayer封装实现
   - [x] ExoPlayer封装实现
-  - [x] VlcPlayer封装实现
+  - [x] vlc-android封装实现
 - [ ] 控制图层相关
   - [ ] 待补充...
 
