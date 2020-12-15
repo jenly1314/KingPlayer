@@ -20,6 +20,10 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 - [ ] 控制图层相关
   - [ ] 待补充...
 
+## Gif 展示
+![Image](GIF.gif)
+###### 录制的gif效果有点不清晰，可以下载App查看详情。
+
 ## 示例
 
 布局示例
