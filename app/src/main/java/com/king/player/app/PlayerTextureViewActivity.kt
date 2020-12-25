@@ -58,6 +58,7 @@ class PlayerTextureViewActivity: BaseActivity() {
                 width: Int,
                 height: Int
             ) {
+                LogUtils.d("onSurfaceTextureAvailable: $width * $height")
                 player.setSurface(surface)
                 player.updateSurface(width,height)
 
@@ -71,10 +72,12 @@ class PlayerTextureViewActivity: BaseActivity() {
                 width: Int,
                 height: Int
             ) {
+                LogUtils.d("onSurfaceTextureSizeChanged: $width * $height")
                 player.updateSurface(width,height)
             }
 
             override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
+                LogUtils.d("onSurfaceTextureDestroyed")
                 player.surfaceDestroy()
                 return false
             }
@@ -87,11 +90,6 @@ class PlayerTextureViewActivity: BaseActivity() {
 
     }
 
-
-    override fun onResume() {
-        super.onResume()
-        player.start()
-    }
 
 
     override fun onPause() {

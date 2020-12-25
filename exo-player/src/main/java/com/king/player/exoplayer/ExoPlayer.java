@@ -148,11 +148,12 @@ public class ExoPlayer extends KingPlayer<SimpleExoPlayer> {
                 case C.TYPE_HLS:
                     mediaSource = new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem);
                     break;
-                case C.TYPE_OTHER:
-                    mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem);
-                    break;
                 case C.TYPE_SS:
                     mediaSource = new SsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem);
+                    break;
+                case C.TYPE_OTHER:
+                default:
+                    mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem);
                     break;
             }
         }

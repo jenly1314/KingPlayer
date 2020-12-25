@@ -53,6 +53,7 @@ class PlayerSurfaceViewActivity: BaseActivity() {
 
         surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
+                LogUtils.d("surfaceCreated")
                 player.setSurface(holder)
                 player.updateSurface(surfaceView.width,surfaceView.height)
 
@@ -68,10 +69,12 @@ class PlayerSurfaceViewActivity: BaseActivity() {
                 width: Int,
                 height: Int
             ) {
+                LogUtils.d("surfaceChanged: $width * $height")
                 player.updateSurface(surfaceView.width,surfaceView.height)
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder?) {
+                LogUtils.d("surfaceDestroyed")
                 player.surfaceDestroy()
             }
 
@@ -79,10 +82,6 @@ class PlayerSurfaceViewActivity: BaseActivity() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        player.start()
-    }
 
     override fun onPause() {
         super.onPause()

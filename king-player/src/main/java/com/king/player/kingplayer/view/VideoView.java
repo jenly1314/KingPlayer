@@ -135,6 +135,7 @@ public class VideoView extends FrameLayout implements IMeasureSurface, IPlayer<K
                     if(mOnSurfaceListener != null){
                         mOnSurfaceListener.onSurfaceDestroyed(mSurface);
                     }
+                    mPlayer.surfaceDestroy();
                 }
             });
         }else{
@@ -159,10 +160,10 @@ public class VideoView extends FrameLayout implements IMeasureSurface, IPlayer<K
 
                 @Override
                 public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                    mPlayer.surfaceDestroy();
                     if(mOnSurfaceListener != null){
                         mOnSurfaceListener.onSurfaceDestroyed(mSurface);
                     }
+                    mPlayer.surfaceDestroy();
                     return true;
                 }
 

@@ -51,7 +51,7 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
     @Override
     public void setDataSource(@NonNull DataSource dataSource) {
         try {
-
+            LogUtils.d("setDataSource");
             if(mDataSource != null){
                 mMediaPlayer.stop();
                 mMediaPlayer.reset();
@@ -121,6 +121,7 @@ public class IjkPlayer extends KingPlayer<IjkMediaPlayer> {
     }
 
     private void addListener(){
+        LogUtils.d("onPrepared");
         mMediaPlayer.setOnVideoSizeChangedListener(new IMediaPlayer.OnVideoSizeChangedListener() {
             @Override
             public void onVideoSizeChanged(IMediaPlayer iMediaPlayer,int width, int height, int sarNum, int sarDen) {

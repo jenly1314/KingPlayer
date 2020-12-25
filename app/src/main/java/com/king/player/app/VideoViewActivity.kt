@@ -68,12 +68,6 @@ open class VideoViewActivity : BaseActivity() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        videoView.start()
-    }
-
-
     override fun onPause() {
         super.onPause()
         videoView.pause()
