@@ -35,13 +35,15 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 
 使用 **SysPlayer** (Android自带的MediaPlayer)
 ```gradle
+//KingPlayer基础库，内置SysPlayer
 implementation 'com.king.player:king-player:1.0.0-beta1'
 ```
 
 使用 **IjkPlayer**
 ```gradle
+//KingPlayer基础库（必须）
 implementation 'com.king.player:king-player:1.0.0-beta1'
-
+//IjkPlayer
 implementation 'com.king.player:ijk-player:1.0.0-beta1'
 
 // 根据您的需求选择ijk模式的so
@@ -56,15 +58,17 @@ implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
 
 使用 **ExoPlayer**
 ```gradle
+//KingPlayer基础库（必须）
 implementation 'com.king.player:king-player:1.0.0-beta1'
-
+//ExoPlayer
 implementation 'com.king.player:exo-player:1.0.0-beta1'
 ```
 
-使用VlcPlayer
+使用 **VlcPlayer**
 ```gradle
+//KingPlayer基础库（必须）
 implementation 'com.king.player:king-player:1.0.0-beta1'
-
+//VlcPlayer
 implementation 'com.king.player:vlc-player:1.0.0-beta1'
 ```
 
