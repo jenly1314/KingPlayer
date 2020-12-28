@@ -82,6 +82,7 @@ implementation 'com.king.player:vlc-player:1.0.0-beta1'
 ```kotlin
         //初始化一个视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、SysPlayer）
         videoView.player = IjkPlayer(context)
+        //初始化数据源
         val dataSource = DataSource(url)
         videoView.setDataSource(dataSource)
 
