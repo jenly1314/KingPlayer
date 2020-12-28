@@ -1,7 +1,7 @@
 # KingPlayer
 
 [![Download](https://img.shields.io/badge/download-App-blue.svg)](https://raw.githubusercontent.com/jenly1314/KingPlayer/master/app/release/app-release.apk)
-[![JCenter](https://img.shields.io/badge/JCenter-1.0.0-beta1-46C018.svg)](https://bintray.com/beta/#/jenly/maven/king-player)
+[![JCenter](https://img.shields.io/badge/JCenter-1.0.0-46C018.svg)](https://bintray.com/beta/#/jenly/maven/king-player)
 [![JitPack](https://jitpack.io/v/jenly1314/KingPlayer.svg)](https://jitpack.io/#jenly1314/KingPlayer)
 [![CI](https://travis-ci.org/jenly1314/KingPlayer.svg?branch=master)](https://travis-ci.org/jenly1314/KingPlayer)
 [![CircleCI](https://circleci.com/gh/jenly1314/KingPlayer.svg?style=svg)](https://circleci.com/gh/jenly1314/KingPlayer)
