@@ -137,8 +137,20 @@ implementation 'com.king.player:vlc-player:1.0.0-beta1'
         videoView.reset()
 ```
 
-
 更多使用详情，请查看[app](app)中的源码使用示例
+
+
+### 其他
+
+需使用JDK8+编译，在你项目中的build.gradle的android{}中添加配置：
+
+```gradle
+compileOptions {
+    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_8
+}
+
+```
 
 ## 版本记录
 
