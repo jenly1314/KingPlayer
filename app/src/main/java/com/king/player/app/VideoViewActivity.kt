@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.video_view_activity.*
 open class VideoViewActivity : BaseActivity() {
 
 
-    //    val url = "rtmp://58.200.131.2:1935/livetv/hunantv"
+//        val url = "rtmp://58.200.131.2:1935/livetv/hunantv"
     val url = "http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8"
 //    val url = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
 
@@ -34,11 +34,12 @@ open class VideoViewActivity : BaseActivity() {
     override fun initData() {
 
         videoView.player = createPlayer()
+        val dataSource = DataSource(url)
+        videoView.setDataSource(dataSource)
+
         videoView.setOnSurfaceListener(object : VideoView.OnSurfaceListener {
             override fun onSurfaceCreated(surface: Surface, width: Int, height: Int) {
                 LogUtils.d("onSurfaceCreated: $width * $height")
-                val dataSource = DataSource(url)
-                videoView.setDataSource(dataSource)
                 videoView.start()
             }
 

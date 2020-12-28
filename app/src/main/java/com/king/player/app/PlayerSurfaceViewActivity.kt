@@ -51,14 +51,15 @@ class PlayerSurfaceViewActivity: BaseActivity() {
 
         }
 
+        val dataSource = DataSource(url)
+        player.setDataSource(dataSource)
+
         surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 LogUtils.d("surfaceCreated")
                 player.setSurface(holder)
                 player.updateSurface(surfaceView.width,surfaceView.height)
 
-                val dataSource = DataSource(url)
-                player.setDataSource(dataSource)
                 player.start()
 
             }

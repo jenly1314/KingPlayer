@@ -52,6 +52,9 @@ class PlayerTextureViewActivity: BaseActivity() {
 
         }
 
+        val dataSource = DataSource(url)
+        player.setDataSource(dataSource)
+
         textureView.surfaceTextureListener = object: TextureView.SurfaceTextureListener{
             override fun onSurfaceTextureAvailable(
                 surface: SurfaceTexture,
@@ -62,8 +65,6 @@ class PlayerTextureViewActivity: BaseActivity() {
                 player.setSurface(surface)
                 player.updateSurface(width,height)
 
-                val dataSource = DataSource(url)
-                player.setDataSource(dataSource)
                 player.start()
             }
 

@@ -157,18 +157,27 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
     @Override
     public void setSurface(@NonNull SurfaceHolder surfaceHolder) {
         mMediaPlayer.getVLCVout().setVideoSurface(surfaceHolder.getSurface(),surfaceHolder);
+        if(!mMediaPlayer.getVLCVout().areViewsAttached()){
+            mMediaPlayer.getVLCVout().attachViews(this);
+        }
         sendPlayerEvent(Event.EVENT_ON_SURFACE_HOLDER_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull Surface surface) {
         mMediaPlayer.getVLCVout().setVideoSurface(surface,null);
+        if(!mMediaPlayer.getVLCVout().areViewsAttached()){
+            mMediaPlayer.getVLCVout().attachViews(this);
+        }
         sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
     @Override
     public void setSurface(@NonNull SurfaceTexture surfaceTexture) {
         mMediaPlayer.getVLCVout().setVideoSurface(surfaceTexture);
+        if(!mMediaPlayer.getVLCVout().areViewsAttached()){
+            mMediaPlayer.getVLCVout().attachViews(this);
+        }
         sendPlayerEvent(Event.EVENT_ON_SURFACE_UPDATE);
     }
 
@@ -349,8 +358,6 @@ public class VlcPlayer extends KingPlayer<MediaPlayer> implements IVLCVout.OnNew
                 recycleBundle();
             }
         });
-        mMediaPlayer.getVLCVout().attachViews(this);
-
         mMediaPlayer.setVideoTrackEnabled(true);
         mMediaPlayer.setAspectRatio(null);
         mMediaPlayer.setScale(0);

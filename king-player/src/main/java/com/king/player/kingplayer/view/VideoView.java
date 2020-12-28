@@ -104,7 +104,7 @@ public class VideoView extends FrameLayout implements IMeasureSurface, IPlayer<K
     }
 
 
-    public final void setPlayer(KingPlayer player){
+    public final void setPlayer(@NonNull KingPlayer player){
         this.mPlayer = player;
         initSurface();
     }
