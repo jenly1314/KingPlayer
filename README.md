@@ -11,7 +11,7 @@
 [![QQGroup](https://img.shields.io/badge/QQGroup-20867961-blue.svg)](http://shang.qq.com/wpa/qunwpa?idkey=8fcc6a2f88552ea44b1411582c94fd124f7bb3ec227e2a400dbbfaad3dc2f5ad)
 
 
-KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、MediaPlayer）的基础库，无缝切换内核。
+KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、SysPlayer）的基础库，无缝切换内核。
 
 
 ## 功能说明
@@ -33,12 +33,12 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 
 ### gradle:
 
-使用SysPlayer(Android自带的MediaPlayer)
+使用 **SysPlayer** (Android自带的MediaPlayer)
 ```gradle
 implementation 'com.king.player:king-player:1.0.0-beta1'
 ```
 
-使用IjkPlayer
+使用 **IjkPlayer**
 ```gradle
 implementation 'com.king.player:king-player:1.0.0-beta1'
 
@@ -54,7 +54,7 @@ implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
 
 ```
 
-使用ExoPlayer
+使用 **ExoPlayer**
 ```gradle
 implementation 'com.king.player:king-player:1.0.0-beta1'
 
