@@ -139,7 +139,7 @@ implementation 'com.king.player:vlc-player:1.0.0-beta1'
         videoView.reset()
 ```
 
-更多使用详情，请查看[app](app)中的源码使用示例
+更多使用详情，请查看[app](app)中的源码使用示例或直接查看[API帮助文档](https://jenly1314.github.io/projects/KingPlayer/doc/)
 
 
 ### 其他
