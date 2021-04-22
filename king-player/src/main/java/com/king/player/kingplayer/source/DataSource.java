@@ -3,10 +3,8 @@ package com.king.player.kingplayer.source;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
-import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
