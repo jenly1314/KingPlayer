@@ -36,6 +36,7 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 	repositories {
 	  //...
 	  mavenCentral()
+	  maven { url 'https://jitpack.io' }
 	}
 	```
 
