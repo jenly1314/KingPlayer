@@ -1,12 +1,11 @@
 # KingPlayer
 
-[![Download](https://img.shields.io/badge/download-App-blue.svg)](https://raw.githubusercontent.com/jenly1314/KingPlayer/master/app/release/app-release.apk)
-[![JCenter](https://img.shields.io/badge/JCenter-1.0.0.beta1-46C018.svg)](https://bintray.com/beta/#/jenly/maven/king-player)
-[![JitPack](https://jitpack.io/v/jenly1314/KingPlayer.svg)](https://jitpack.io/#jenly1314/KingPlayer)
-[![CI](https://travis-ci.org/jenly1314/KingPlayer.svg?branch=master)](https://travis-ci.org/jenly1314/KingPlayer)
-[![CircleCI](https://circleci.com/gh/jenly1314/KingPlayer.svg?style=svg)](https://circleci.com/gh/jenly1314/KingPlayer)
-[![API](https://img.shields.io/badge/API-21%2B-blue.svg?style=flat)](https://android-arsenal.com/api?level=21)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/mit-license.php)
+[![JitPack](https://img.shields.io/jitpack/v/github/jenly1314/KingPlayer?logo=jitpack)](https://jitpack.io/#jenly1314/KingPlayer)
+[![CircleCI](https:///img.shields.io/circleci/build/github/jenly1314/KingPlayer?logo=circleci)](https://app.circleci.com/pipelines/github/jenly1314/KingPlayer)
+[![Download](https://img.shields.io/badge/download-APK-brightgreen?logo=github)](https://raw.githubusercontent.com/jenly1314/KingPlayer/master/app/release/app-release.apk)
+[![API](https://img.shields.io/badge/API-21%2B-brightgreen?logo=android)](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels)
+[![License](https://img.shields.io/github/license/jenly1314/KingPlayer?logo=open-source-initiative)](https://opensource.org/licenses/mit)
+
 
 KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、VlcPlayer、SysPlayer）的基础库，无缝切换内核。
 
@@ -21,7 +20,7 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 - [ ] 控制图层相关
   - [ ] 待补充...
 
-## Gif 展示
+## 效果展示
 ![Image](GIF.gif)
 
 > 你也可以直接下载 [演示App](https://raw.githubusercontent.com/jenly1314/KingPlayer/master/app/release/app-release.apk) 体验效果
@@ -40,7 +39,7 @@ KingPlayer 一个专注于 Android 视频播放器（IjkPlayer、ExoPlayer、Vlc
 	}
 	```
 
-2. 在Module的 **build.gradle** 里面添加引入依赖项
+2. 在Module的 **build.gradle** 中添加依赖项
 
 	使用 **SysPlayer** (Android自带的MediaPlayer)
 	```gradle
@@ -163,44 +162,27 @@ compileOptions {
 
 ```
 
-## 版本记录
+## 相关推荐
+- [ImageViewer](https://github.com/jenly1314/ImageViewer) 一个图片查看器，一般用来查看图片详情或查看大图时使用。
+- [CameraScan](https://github.com/jenly1314/CameraScan) 一个简化扫描识别流程的通用基础库。
+- [LibYuv](https://github.com/jenly1314/LibYuv) 基于Google的libyuv编译封装的YUV转换工具库，主要用途是在各种YUV与RGB之间进行相互转换、裁减、旋转、缩放、镜像等。
+- [ZXingLite](https://github.com/jenly1314/ZXingLite) 基于zxing实现的扫码库，优化扫码和生成二维码/条形码功能。
+- [MLKit](https://github.com/jenly1314/MLKit) 一个强大易用的工具包。通过ML Kit您可以很轻松的实现文字识别、条码识别、图像标记、人脸检测、对象检测等功能。
+- [WeChatQRCode](https://github.com/jenly1314/WeChatQRCode) 基于OpenCV开源的微信二维码引擎移植的扫码识别库。
+
+
+## 版本日志
 
 #### v1.0.0-beta1：2020-12-28
 *  KingPlayer初始版本
 
 ## 感谢
+- [ijkPlayer](https://github.com/bilibili/ijkplayer)
+- [ExoPlayer](https://github.com/google/ExoPlayer)
+- [vlc-android](https://code.videolan.org/videolan/vlc-android)
+- [MediaPlayer](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/media/java/android/media/MediaPlayer.java)
 
-[ijkPlayer](https://github.com/bilibili/ijkplayer)
+---
 
-[ExoPlayer](https://github.com/google/ExoPlayer)
-
-[vlc-android](https://code.videolan.org/videolan/vlc-android)
-
-[MediaPlayer](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/media/java/android/media/MediaPlayer.java)
-
-
-## 赞赏
-如果您喜欢KingPlayer，或感觉KingPlayer帮助到了您，可以点右上角“Star”支持一下，您的支持就是我的动力，谢谢 :smiley:
-<p>您也可以扫描下面的二维码，请作者喝杯咖啡 :coffee:
-
-<div>
-   <img src="https://jenly1314.github.io/image/page/rewardcode.png">
-</div>
-
-## 关于我
-
-| 我的博客                                                                                | GitHub                                                                                  | Gitee                                                                                  | CSDN                                                                                 | 博客园                                                                            |
-|:------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|
-| <a title="我的博客" href="https://jenly1314.github.io" target="_blank">Jenly's Blog</a> | <a title="GitHub开源项目" href="https://github.com/jenly1314" target="_blank">jenly1314</a> | <a title="Gitee开源项目" href="https://gitee.com/jenly1314" target="_blank">jenly1314</a>  | <a title="CSDN博客" href="http://blog.csdn.net/jenly121" target="_blank">jenly121</a>  | <a title="博客园" href="https://www.cnblogs.com/jenly" target="_blank">jenly</a>  |
-
-## 联系我
-
-| 微信公众号        | Gmail邮箱                                                                          | QQ邮箱                                                                              | QQ群                                                                                                                       | QQ群                                                                                                                       |
-|:-------------|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|
-| [Jenly666](http://weixin.qq.com/r/wzpWTuPEQL4-ract92-R) | <a title="给我发邮件" href="mailto:jenly1314@gmail.com" target="_blank">jenly1314</a> | <a title="给我发邮件" href="mailto:jenly1314@vip.qq.com" target="_blank">jenly1314</a> | <a title="点击加入QQ群" href="https://qm.qq.com/cgi-bin/qm/qr?k=6_RukjAhwjAdDHEk2G7nph-o8fBFFzZz" target="_blank">20867961</a> | <a title="点击加入QQ群" href="https://qm.qq.com/cgi-bin/qm/qr?k=Z9pobM8bzAW7tM_8xC31W8IcbIl0A-zT" target="_blank">64020761</a> |
-
-<div>
-   <img src="https://jenly1314.github.io/image/page/footer.png">
-</div>
-   
+![footer](https://jenly1314.github.io/page/footer.svg)
    
